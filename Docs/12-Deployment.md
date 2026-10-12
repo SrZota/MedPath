@@ -1,290 +1,65 @@
-# Decisões Arquiteturais
+# Ambientes e Deploy
 
-## Objetivo
-
-Este documento consolida as principais decisões arquiteturais adotadas no MedPath.
-
-Seu objetivo é fornecer uma visão centralizada das escolhas realizadas durante o desenvolvimento do projeto, facilitando o entendimento da arquitetura e servindo como ponto de referência para desenvolvedores, arquitetos e mantenedores.
-
-Cada decisão detalhada possui um ADR correspondente localizado na pasta **Adr**.
+| Campo | Valor |
+|-------|-------|
+| Versão | 0.2.0 |
+| Status | Parcial: o deploy em nuvem será decidido no fim da Fase 1 |
+| Última atualização | 12/10/2026 |
 
 ---
 
-# Como Ler Este Documento
+## Ambientes
 
-Cada decisão apresenta:
-
-- O problema que motivou a escolha;
-- A decisão adotada;
-- A justificativa;
-- O impacto esperado;
-- O ADR correspondente.
+| Ambiente | Onde | Quando |
+|----------|------|--------|
+| Development | Máquina do desenvolvedor + SQL Server em Docker | Fase 0 |
+| CI | GitHub Actions (build + testes com Testcontainers) | Fase 0 |
+| Production | Nuvem (a decidir em ADR) | Fim da Fase 1 |
 
 ---
 
-# Resumo das Decisões
+## Ambiente local
 
-| Código | Decisão | Status |
-|---------|---------|--------|
-| ADR-001 | API First | ✅ Aceita |
-| ADR-002 | Modular Monolith | ✅ Aceita |
-| ADR-003 | Clean Architecture | ✅ Aceita |
-| ADR-004 | SQL Server | ⏳ Planejada |
-| ADR-005 | JWT | ⏳ Planejada |
-| ADR-006 | Entity Framework Core | ⏳ Planejada |
-| ADR-007 | FluentValidation | ⏳ Planejada |
-| ADR-008 | Serilog | ⏳ Planejada |
-| ADR-009 | Versionamento da API | ⏳ Planejada |
+Pré-requisitos:
+
+- .NET 10 SDK
+- Docker Desktop (com WSL2 no Windows)
+- Git
+- IDE: Visual Studio 2026, Rider ou VS Code com C# Dev Kit
+- Cliente SQL (opcional): Azure Data Studio, SSMS ou extensão de SQL do VS Code
+
+O SQL Server roda via `docker-compose.yml` na raiz (será criado na Sessão 1). A connection string de desenvolvimento fica em **user-secrets**, nunca no `appsettings.json` versionado.
 
 ---
 
-# ADR-001 — API First
+## Configuração e segredos
 
-## Problema
-
-O sistema será consumido por uma aplicação Web e, futuramente, poderá ser integrado com outras aplicações.
-
-## Decisão
-
-Adotar a abordagem **API First**, desenvolvendo os contratos da API antes da implementação das funcionalidades.
-
-## Justificativa
-
-- Facilita integrações.
-- Permite evolução independente do frontend.
-- Define contratos claros entre cliente e servidor.
-
-## Impacto
-
-Todas as funcionalidades deverão ser expostas através de APIs REST documentadas.
+| Tipo | Development | Production |
+|------|-------------|------------|
+| Connection string | `dotnet user-secrets` | Variável de ambiente / cofre de segredos |
+| Chave de assinatura JWT | `dotnet user-secrets` | Cofre de segredos |
+| Demais configurações | `appsettings.Development.json` | Variáveis de ambiente |
 
 ---
 
-# ADR-002 — Modular Monolith
+## CI (GitHub Actions), a implementar na Sessão 10
 
-## Problema
+Em todo push e Pull Request:
 
-Era necessário definir uma arquitetura que permitisse crescimento sem introduzir a complexidade operacional dos microsserviços.
+1. `dotnet restore`
+2. `dotnet build -warnaserror`
+3. `dotnet test` (unitários + integração com Testcontainers)
+4. `dotnet format --verify-no-changes`
 
-## Decisão
-
-Adotar uma arquitetura **Monólito Modular**.
-
-## Justificativa
-
-- Simplicidade de implantação.
-- Menor custo operacional.
-- Separação clara entre módulos.
-- Facilidade para futura migração para microsserviços.
-
-## Impacto
-
-Cada módulo possuirá responsabilidade própria e dependerá de contratos bem definidos.
+O PR só pode ser mergeado com o CI verde (branch protection na `master`).
 
 ---
 
-# ADR-003 — Clean Architecture
+## Produção (a decidir)
 
-## Problema
+Itens que o ADR de hospedagem precisa responder:
 
-Era necessário manter as regras de negócio independentes de frameworks e tecnologias.
-
-## Decisão
-
-Adotar a **Clean Architecture**.
-
-## Justificativa
-
-- Baixo acoplamento.
-- Alta testabilidade.
-- Independência tecnológica.
-- Facilidade de manutenção.
-
-## Impacto
-
-O domínio permanecerá isolado da infraestrutura.
-
----
-
-# ADR-004 — SQL Server
-
-## Problema
-
-Era necessário definir um banco de dados relacional confiável para suportar o domínio da aplicação.
-
-## Decisão
-
-Utilizar SQL Server.
-
-## Justificativa
-
-- Excelente integração com o ecossistema .NET.
-- Suporte completo ao Entity Framework Core.
-- Recursos avançados de segurança e desempenho.
-
-## Impacto
-
-Toda a persistência será baseada em banco de dados relacional.
-
-**Status:** Planejado.
-
----
-
-# ADR-005 — JWT
-
-## Problema
-
-Era necessário definir uma estratégia de autenticação stateless para a API.
-
-## Decisão
-
-Utilizar JSON Web Token (JWT).
-
-## Justificativa
-
-- Escalabilidade.
-- Independência de sessão.
-- Compatibilidade com APIs REST.
-
-## Impacto
-
-A autenticação será baseada em tokens assinados.
-
-**Status:** Planejado.
-
----
-
-# ADR-006 — Entity Framework Core
-
-## Problema
-
-Era necessário definir uma estratégia para persistência de dados.
-
-## Decisão
-
-Utilizar Entity Framework Core como ORM.
-
-## Justificativa
-
-- Integração nativa com .NET.
-- Suporte a Migrations.
-- Fluent API.
-- Alto nível de produtividade.
-
-## Impacto
-
-Todo acesso ao banco será realizado através da camada Infrastructure.
-
-**Status:** Planejado.
-
----
-
-# ADR-007 — FluentValidation
-
-## Problema
-
-Era necessário padronizar a validação das entradas da aplicação.
-
-## Decisão
-
-Utilizar FluentValidation.
-
-## Justificativa
-
-- Separação das regras de validação.
-- Código mais limpo.
-- Fácil manutenção.
-
-## Impacto
-
-As validações serão executadas na camada Application.
-
-**Status:** Planejado.
-
----
-
-# ADR-008 — Serilog
-
-## Problema
-
-Era necessário definir uma estratégia para registro estruturado de logs.
-
-## Decisão
-
-Utilizar Serilog.
-
-## Justificativa
-
-- Logs estruturados.
-- Integração com diversos provedores.
-- Facilidade para auditoria e monitoramento.
-
-## Impacto
-
-Todos os eventos importantes da aplicação deverão ser registrados.
-
-**Status:** Planejado.
-
----
-
-# ADR-009 — Versionamento da API
-
-## Problema
-
-Era necessário garantir evolução da API sem quebrar integrações existentes.
-
-## Decisão
-
-Versionar a API.
-
-## Justificativa
-
-- Compatibilidade entre versões.
-- Evolução controlada.
-- Menor impacto para consumidores.
-
-## Impacto
-
-Os endpoints seguirão o padrão:
-
-```text
-/api/v1/
-```
-
-**Status:** Planejado.
-
----
-
-# Diretrizes para Novas Decisões
-
-Toda nova decisão arquitetural deverá:
-
-- Resolver um problema identificado.
-- Avaliar alternativas.
-- Registrar justificativa.
-- Documentar impactos.
-- Possuir um ADR correspondente.
-
----
-
-# Histórico
-
-| Data | ADR | Descrição |
-|------|-----|-----------|
-| 2026 | ADR-001 | API First |
-| 2026 | ADR-002 | Modular Monolith |
-| 2026 | ADR-003 | Clean Architecture |
-| 2026 | ADR-004 | SQL Server |
-| 2026 | ADR-005 | JWT |
-| 2026 | ADR-006 | Entity Framework Core |
-| 2026 | ADR-007 | FluentValidation |
-| 2026 | ADR-008 | Serilog |
-| 2026 | ADR-009 | Versionamento da API |
-
----
-
-# Considerações
-
-As decisões registradas neste documento representam o estado atual da arquitetura do MedPath.
-
-Sempre que uma decisão for alterada, um novo ADR deverá ser criado, preservando o histórico e garantindo a rastreabilidade das escolhas arquiteturais do projeto.
+- Hospedagem da API (container): Azure App Service / Container Apps, Fly.io, Railway…
+- Banco: Azure SQL (há um tier gratuito limitado) ou reavaliação para PostgreSQL ([ADR-005](Adr/ADR-005-sqlserver-efcore.md)).
+- Como aplicar as migrations no deploy (bundle `efbundle` executado no pipeline).
+- Domínio, HTTPS e custo mensal estimado.
