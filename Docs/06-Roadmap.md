@@ -1,313 +1,108 @@
 # Roadmap
 
-## Objetivo
-
-Este documento descreve o planejamento evolutivo do MedPath, organizando a implementação em fases incrementais.
-
-Cada etapa representa um conjunto de funcionalidades que agregam valor ao produto, permitindo entregas contínuas e facilitando o acompanhamento do desenvolvimento.
-
-As fases apresentadas poderão ser revisadas conforme a evolução do projeto.
+| Campo | Valor |
+|-------|-------|
+| Código | ROADMAP-001 |
+| Versão | 0.2.0 |
+| Status | Aprovado |
+| Última atualização | 12/10/2026 |
 
 ---
 
-# Visão Geral
+## Premissas
+
+- Desenvolvedor solo, com **sessões de ~2h por dia**.
+- Cada sessão entrega algo integrado à `master` via Pull Request.
+- O detalhamento das tarefas fica no [Backlog](Backlog.md). Este documento mostra apenas o quadro geral.
+
+---
+
+## Visão Geral
 
 ```text
-Planejamento
-
-Fase 0 → Fundação Técnica
-Fase 1 → MVP
-Fase 2 → Evolução do Produto
-Fase 3 → Experiência do Usuário
-Fase 4 → Escalabilidade
-Fase 5 → Inteligência da Plataforma
+Fase 0 → Fundação técnica          (walking skeleton)
+Fase 1 → MVP: "Para onde eu vou?"  (busca + admin + web)
+Fase 2 → Conta do paciente         (favoritos, avaliações, busca por endereço)
+Fase 3 → Instituições              (gestores mantêm os próprios dados, tempo de espera)
+Fase 4 → Escala e integrações      (API para sistemas externos, cache, observabilidade)
+Fase 5 → Agendamento e inteligência
 ```
 
 ---
 
-# Fase 0 — Fundação Técnica
+## Fase 0: Fundação técnica
 
-## Objetivo
+**Objetivo:** ter um endpoint de busca por proximidade funcionando de ponta a ponta, com dados reais, testes e CI. É um *walking skeleton*: o esqueleto completo do sistema, ainda magro.
 
-Construir toda a infraestrutura necessária para o desenvolvimento da aplicação.
+- Ambiente local: .NET 10 SDK, Docker e SQL Server em container.
+- Solution com host da API e módulo Facilities.
+- Domínio `HealthFacility` com testes unitários.
+- EF Core com schema próprio, migrations e coluna `geography`.
+- Importador CNES (amostra da cidade de São Paulo).
+- `GET /api/v1/facilities/nearby`.
+- ProblemDetails, validação, logs e health check.
+- Testes de integração com banco real (Testcontainers).
+- CI no GitHub Actions.
 
-### Arquitetura
-
-- Estrutura inicial da Solution.
-- Modular Monolith.
-- Clean Architecture.
-- Domain-Driven Design.
-- Configuração do Entity Framework Core.
-- SQL Server.
-- Sistema de Migrations.
-
-### Segurança
-
-- Autenticação JWT.
-- Controle de acesso por perfis.
-
-### Qualidade
-
-- Configuração de Logs.
-- Tratamento global de exceções.
-- Swagger.
-- FluentValidation.
+**Concluída quando:** um `curl` com a latitude/longitude da ETEC Horácio Augusto da Silveira retorna as unidades reais mais próximas, e o CI está verde.
 
 ---
 
-# Fase 1 — MVP
+## Fase 1: MVP
 
-## Objetivo
+**Objetivo:** produto utilizável por qualquer pessoa na região piloto (cidade de São Paulo).
 
-Disponibilizar a primeira versão funcional da plataforma.
+- Filtros: tipo, especialidade, convênio, aberto agora.
+- Detalhes da unidade e link de rota.
+- Módulo Identity: login de administrador com JWT.
+- Área admin: CRUD de unidades, especialidades e convênios.
+- Importação completa do CNES (estado de SP).
+- Cliente Web responsivo. A tecnologia será decidida em ADR no início da fase.
+- Primeiro deploy em nuvem.
 
-### Pacientes
-
-- Cadastro.
-- Login.
-- Recuperação de senha.
-- Atualização de perfil.
-
-### Profissionais
-
-- Cadastro.
-- Especialidades.
-- Perfil profissional.
-
-### Instituições
-
-- Cadastro administrativo.
-- Atualização de dados.
-
-### Agendamento
-
-- Visualizar agenda.
-- Agendar consulta.
-- Cancelar consulta.
-- Confirmar consulta.
-
-### Administração
-
-- Cadastro de instituições.
-- Gerenciamento de usuários.
+**Concluída quando:** o fluxo "abrir o site → permitir localização → filtrar → abrir rota" funciona em produção, no celular, em menos de 3 toques.
 
 ---
 
-# Fase 2 — Evolução do Produto
+## Fase 2: Conta do paciente
 
-## Objetivo
-
-Adicionar funcionalidades que aumentem o valor da plataforma.
-
-### Avaliações
-
-- Avaliação de consultas.
-- Comentários.
-- Nota média do profissional.
-
-### Pesquisa
-
-- Busca por especialidade.
-- Busca por cidade.
-- Busca por bairro.
-- Busca por instituição.
-
-### Agenda
-
-- Bloqueio de horários.
-- Configuração de disponibilidade.
-- Horários recorrentes.
+- Cadastro, login e recuperação de senha do paciente.
+- Exclusão de conta (LGPD).
+- Favoritos.
+- Avaliações e moderação (o "feedback" do TCC original).
+- Busca por endereço/CEP (geocodificação).
 
 ---
 
-# Fase 3 — Experiência do Usuário
+## Fase 3: Instituições
 
-## Objetivo
-
-Melhorar a experiência de utilização da plataforma.
-
-### Notificações
-
-- Confirmação de consulta.
-- Lembretes.
-- Cancelamentos.
-
-### Perfil
-
-- Foto do profissional.
-- Currículo.
-- Formação.
-- Idiomas.
-
-### Dashboard
-
-- Histórico de consultas.
-- Próximos atendimentos.
-- Indicadores pessoais.
+- Reivindicação de perfil por gestores.
+- Gestor atualiza os dados e o tempo médio de espera estimado.
+- Indicadores básicos para a instituição.
 
 ---
 
-# Fase 4 — Escalabilidade
+## Fase 4: Escala e integrações
 
-## Objetivo
-
-Preparar a plataforma para crescimento.
-
-### Arquitetura
-
-- Cache.
-- Background Services.
-- Eventos assíncronos.
-
-### Infraestrutura
-
-- Docker.
-- Pipeline CI/CD.
-- Monitoramento.
-- Observabilidade.
-
-### Performance
-
-- Otimização de consultas.
-- Índices adicionais.
-- Compressão de respostas.
-- Rate Limiting.
+- API para sistemas externos (chaves de API, rate limiting por cliente).
+- Cache da busca.
+- Observabilidade (métricas, tracing com OpenTelemetry).
+- Expansão para outros estados.
 
 ---
 
-# Fase 5 — Inteligência da Plataforma
+## Fase 5: Agendamento e inteligência
 
-## Objetivo
-
-Adicionar funcionalidades avançadas.
-
-### Inteligência Artificial
-
-- Recomendar profissionais.
-- Sugestão de especialidades.
-- Busca inteligente.
-
-### Telemedicina
-
-- Chamadas de vídeo.
-- Compartilhamento de arquivos.
-- Chat.
-
-### Financeiro
-
-- Pagamentos.
-- Assinaturas.
-- Convênios.
+- Agendamento em unidades parceiras (o modelo da versão 0.1 do domínio será revisitado).
+- Recomendação personalizada.
+- Aplicativos nativos.
 
 ---
 
-# Evolução Técnica
+## Critérios de pronto (Definition of Done) de qualquer tarefa
 
-Além das funcionalidades, a arquitetura evoluirá continuamente.
-
-## Etapa 1
-
-- Estrutura da Solution.
-- Camadas.
-- Modularização.
-
----
-
-## Etapa 2
-
-- Testes Unitários.
-- Testes de Integração.
-
----
-
-## Etapa 3
-
-- Mensageria.
-- Cache.
-
----
-
-## Etapa 4
-
-- Microsserviços (caso necessário).
-
----
-
-# Critérios para Avanço de Fase
-
-Uma fase será considerada concluída quando:
-
-- Todas as funcionalidades planejadas estiverem implementadas.
-- Todos os testes estiverem aprovados.
-- A documentação estiver atualizada.
-- As APIs estiverem documentadas no Swagger.
-- Não existirem defeitos críticos conhecidos.
-
----
-
-# Backlog Futuro
-
-As funcionalidades abaixo estão fora do escopo atual, mas poderão ser avaliadas futuramente.
-
-## Produto
-
-- Aplicativo mobile.
-- Integração com planos de saúde.
-- Telemedicina.
-- Assinaturas Premium.
-- Marketplace de serviços.
-
----
-
-## Inteligência Artificial
-
-- Recomendação personalizada de profissionais.
-- Assistente virtual.
-- Chat inteligente.
-- Previsão de disponibilidade.
-
----
-
-## Integrações
-
-- Google Calendar.
-- Outlook Calendar.
-- WhatsApp.
-- SMS.
-- E-mail.
-
----
-
-# Prioridades
-
-A evolução do MedPath seguirá a seguinte ordem de prioridade:
-
-| Prioridade | Objetivo |
-|------------|----------|
-| Alta | Estabilizar a arquitetura |
-| Alta | Concluir o MVP |
-| Média | Melhorar a experiência do usuário |
-| Média | Otimizar desempenho |
-| Baixa | Funcionalidades avançadas |
-| Baixa | Inteligência Artificial |
-
----
-
-# Indicadores de Evolução
-
-Durante o desenvolvimento, os seguintes indicadores deverão ser acompanhados:
-
-- Funcionalidades concluídas.
-- Cobertura de testes.
-- Quantidade de bugs.
-- Tempo médio de desenvolvimento.
-- Tempo médio de resolução de defeitos.
-- Percentual da documentação atualizada.
-
----
-
-# Considerações
-
-O Roadmap representa o planejamento estratégico do MedPath e poderá sofrer ajustes conforme novas necessidades de negócio forem identificadas.
-
-Qualquer alteração relevante deverá ser registrada e revisada antes de sua implementação.
+- Código revisado em PR.
+- Build e testes passando no CI.
+- Testes novos para regras novas.
+- Endpoint documentado no OpenAPI.
+- Documentação afetada atualizada (responsabilidade do PO).

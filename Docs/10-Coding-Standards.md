@@ -1,290 +1,57 @@
-# Decisões Arquiteturais
+# Padrões de Código
 
-## Objetivo
+| Campo | Valor |
+|-------|-------|
+| Versão | 0.2.0 |
+| Status | Aprovado (evolui com os code reviews) |
+| Última atualização | 12/10/2026 |
 
-Este documento consolida as principais decisões arquiteturais adotadas no MedPath.
-
-Seu objetivo é fornecer uma visão centralizada das escolhas realizadas durante o desenvolvimento do projeto, facilitando o entendimento da arquitetura e servindo como ponto de referência para desenvolvedores, arquitetos e mantenedores.
-
-Cada decisão detalhada possui um ADR correspondente localizado na pasta **Adr**.
-
----
-
-# Como Ler Este Documento
-
-Cada decisão apresenta:
-
-- O problema que motivou a escolha;
-- A decisão adotada;
-- A justificativa;
-- O impacto esperado;
-- O ADR correspondente.
+Regras que o code review vai cobrar. Sempre que um review encontrar um padrão novo, ele é registrado aqui.
 
 ---
 
-# Resumo das Decisões
-
-| Código | Decisão | Status |
-|---------|---------|--------|
-| ADR-001 | API First | ✅ Aceita |
-| ADR-002 | Modular Monolith | ✅ Aceita |
-| ADR-003 | Clean Architecture | ✅ Aceita |
-| ADR-004 | SQL Server | ⏳ Planejada |
-| ADR-005 | JWT | ⏳ Planejada |
-| ADR-006 | Entity Framework Core | ⏳ Planejada |
-| ADR-007 | FluentValidation | ⏳ Planejada |
-| ADR-008 | Serilog | ⏳ Planejada |
-| ADR-009 | Versionamento da API | ⏳ Planejada |
-
----
-
-# ADR-001 — API First
-
-## Problema
-
-O sistema será consumido por uma aplicação Web e, futuramente, poderá ser integrado com outras aplicações.
-
-## Decisão
-
-Adotar a abordagem **API First**, desenvolvendo os contratos da API antes da implementação das funcionalidades.
-
-## Justificativa
-
-- Facilita integrações.
-- Permite evolução independente do frontend.
-- Define contratos claros entre cliente e servidor.
-
-## Impacto
-
-Todas as funcionalidades deverão ser expostas através de APIs REST documentadas.
-
----
-
-# ADR-002 — Modular Monolith
-
-## Problema
-
-Era necessário definir uma arquitetura que permitisse crescimento sem introduzir a complexidade operacional dos microsserviços.
-
-## Decisão
-
-Adotar uma arquitetura **Monólito Modular**.
-
-## Justificativa
-
-- Simplicidade de implantação.
-- Menor custo operacional.
-- Separação clara entre módulos.
-- Facilidade para futura migração para microsserviços.
-
-## Impacto
-
-Cada módulo possuirá responsabilidade própria e dependerá de contratos bem definidos.
-
----
-
-# ADR-003 — Clean Architecture
-
-## Problema
-
-Era necessário manter as regras de negócio independentes de frameworks e tecnologias.
-
-## Decisão
-
-Adotar a **Clean Architecture**.
-
-## Justificativa
-
-- Baixo acoplamento.
-- Alta testabilidade.
-- Independência tecnológica.
-- Facilidade de manutenção.
-
-## Impacto
-
-O domínio permanecerá isolado da infraestrutura.
-
----
-
-# ADR-004 — SQL Server
-
-## Problema
-
-Era necessário definir um banco de dados relacional confiável para suportar o domínio da aplicação.
-
-## Decisão
-
-Utilizar SQL Server.
-
-## Justificativa
-
-- Excelente integração com o ecossistema .NET.
-- Suporte completo ao Entity Framework Core.
-- Recursos avançados de segurança e desempenho.
-
-## Impacto
-
-Toda a persistência será baseada em banco de dados relacional.
-
-**Status:** Planejado.
-
----
-
-# ADR-005 — JWT
-
-## Problema
-
-Era necessário definir uma estratégia de autenticação stateless para a API.
-
-## Decisão
-
-Utilizar JSON Web Token (JWT).
-
-## Justificativa
-
-- Escalabilidade.
-- Independência de sessão.
-- Compatibilidade com APIs REST.
-
-## Impacto
-
-A autenticação será baseada em tokens assinados.
-
-**Status:** Planejado.
-
----
-
-# ADR-006 — Entity Framework Core
-
-## Problema
-
-Era necessário definir uma estratégia para persistência de dados.
-
-## Decisão
-
-Utilizar Entity Framework Core como ORM.
-
-## Justificativa
-
-- Integração nativa com .NET.
-- Suporte a Migrations.
-- Fluent API.
-- Alto nível de produtividade.
-
-## Impacto
-
-Todo acesso ao banco será realizado através da camada Infrastructure.
-
-**Status:** Planejado.
-
----
-
-# ADR-007 — FluentValidation
-
-## Problema
-
-Era necessário padronizar a validação das entradas da aplicação.
-
-## Decisão
-
-Utilizar FluentValidation.
-
-## Justificativa
-
-- Separação das regras de validação.
-- Código mais limpo.
-- Fácil manutenção.
-
-## Impacto
-
-As validações serão executadas na camada Application.
-
-**Status:** Planejado.
-
----
-
-# ADR-008 — Serilog
-
-## Problema
-
-Era necessário definir uma estratégia para registro estruturado de logs.
-
-## Decisão
-
-Utilizar Serilog.
-
-## Justificativa
-
-- Logs estruturados.
-- Integração com diversos provedores.
-- Facilidade para auditoria e monitoramento.
-
-## Impacto
-
-Todos os eventos importantes da aplicação deverão ser registrados.
-
-**Status:** Planejado.
-
----
-
-# ADR-009 — Versionamento da API
-
-## Problema
-
-Era necessário garantir evolução da API sem quebrar integrações existentes.
-
-## Decisão
-
-Versionar a API.
-
-## Justificativa
-
-- Compatibilidade entre versões.
-- Evolução controlada.
-- Menor impacto para consumidores.
-
-## Impacto
-
-Os endpoints seguirão o padrão:
-
-```text
-/api/v1/
-```
-
-**Status:** Planejado.
-
----
-
-# Diretrizes para Novas Decisões
-
-Toda nova decisão arquitetural deverá:
-
-- Resolver um problema identificado.
-- Avaliar alternativas.
-- Registrar justificativa.
-- Documentar impactos.
-- Possuir um ADR correspondente.
-
----
-
-# Histórico
-
-| Data | ADR | Descrição |
-|------|-----|-----------|
-| 2026 | ADR-001 | API First |
-| 2026 | ADR-002 | Modular Monolith |
-| 2026 | ADR-003 | Clean Architecture |
-| 2026 | ADR-004 | SQL Server |
-| 2026 | ADR-005 | JWT |
-| 2026 | ADR-006 | Entity Framework Core |
-| 2026 | ADR-007 | FluentValidation |
-| 2026 | ADR-008 | Serilog |
-| 2026 | ADR-009 | Versionamento da API |
-
----
-
-# Considerações
-
-As decisões registradas neste documento representam o estado atual da arquitetura do MedPath.
-
-Sempre que uma decisão for alterada, um novo ADR deverá ser criado, preservando o histórico e garantindo a rastreabilidade das escolhas arquiteturais do projeto.
+## Geral
+
+- Código em **inglês** ([ADR-010](Adr/ADR-010-code-language.md)).
+- `Nullable` habilitado e **warnings tratados como erro** (`TreatWarningsAsErrors` no `Directory.Build.props`).
+- `.editorconfig` na raiz é a fonte da verdade de formatação. Rodar `dotnet format` antes de abrir o PR.
+- File-scoped namespaces, um tipo público por arquivo, arquivo com o mesmo nome do tipo.
+
+## Nomes
+
+| Elemento | Convenção | Exemplo |
+|----------|-----------|---------|
+| Classe, método, propriedade | PascalCase | `HealthFacility.Deactivate()` |
+| Parâmetro, variável local | camelCase | `radiusKm` |
+| Campo privado | `_camelCase` | `_specialties` |
+| Interface | prefixo `I` | `IFacilityRepository` |
+| Método assíncrono | sufixo `Async` | `GetByIdAsync` |
+| Constante | PascalCase | `MaxRadiusKm` |
+
+## Domínio
+
+- Entidades **sem setters públicos**: o estado muda por métodos com nome de negócio (`Deactivate()`, não `IsActive = false`).
+- Construtores privados mais métodos de fábrica (`Create`) que validam as invariantes.
+- Value Objects imutáveis (`record` ou `sealed class` com igualdade por valor).
+- Coleções expostas como `IReadOnlyCollection<T>`.
+- O domínio não referencia EF Core, ASP.NET nem nenhum pacote de infraestrutura.
+- Regra violada → `Result` com erro tipado, ou exceção de domínio. A decisão entre os dois será tomada junto na Sessão 3, e é um ótimo tema de estudo.
+
+## Classes
+
+- Classes `sealed` por padrão. Herança só quando for intencional.
+- Dependências via construtor (primary constructors são permitidos).
+- `CancellationToken` em todo método assíncrono que faz I/O, propagado até o EF Core.
+- Sem `async void`. Sem `.Result` nem `.Wait()`.
+
+## Comentários
+
+- O código deve se explicar sozinho pelos nomes. Comentários explicam o **porquê**, nunca o **o quê**.
+- Exceção: referenciar a regra de negócio, por exemplo `// RN008: dados manuais não são sobrescritos pela importação`.
+
+## Git
+
+- Branch por tarefa: `feat/<assunto>`, `fix/<assunto>`, `chore/<assunto>`, `test/<assunto>`.
+- Commits pequenos no padrão **Conventional Commits** (`feat(facilities): add GeoLocation value object`).
+- `git pull` antes de começar cada sessão. Edite o repositório sempre num único lugar (local **ou** GitHub).
+- Tudo entra na `master` via Pull Request com review.

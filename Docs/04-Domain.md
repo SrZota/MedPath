@@ -1,420 +1,152 @@
 # Modelo de Domínio
 
+| Campo | Valor |
+|-------|-------|
+| Código | DOMAIN-001 |
+| Versão | 0.2.0 |
+| Status | Aprovado (MVP); fases futuras em esboço |
+| Última atualização | 12/10/2026 |
+
+---
+
 ## Objetivo
 
-Este documento descreve o modelo de domínio do MedPath utilizando os conceitos de **Domain-Driven Design (DDD)**.
-
-Seu objetivo é representar o negócio da plataforma de forma independente da tecnologia utilizada, definindo a linguagem ubíqua, os contextos delimitados, as entidades, os objetos de valor, os agregados e os eventos de domínio.
+Descrever o negócio do MedPath com os conceitos de **Domain-Driven Design (DDD)**, sem depender de tecnologia. O código deve usar exatamente os nomes da coluna **Termo no código**, o que garante uma linguagem ubíqua entre documento e implementação.
 
 ---
 
-# Visão Geral do Domínio
+## Linguagem Ubíqua
 
-O MedPath é uma plataforma que conecta pacientes, profissionais e instituições de saúde, permitindo localizar profissionais, consultar disponibilidade, agendar atendimentos e avaliar consultas realizadas.
-
-O domínio foi dividido em contextos delimitados para manter as responsabilidades bem definidas e reduzir o acoplamento entre diferentes áreas do sistema.
-
----
-
-# Linguagem Ubíqua
-
-Durante o desenvolvimento do projeto, os seguintes termos deverão possuir significado único em toda a aplicação.
-
-| Termo | Descrição |
-|--------|-----------|
-| Usuário | Pessoa autenticada na plataforma. |
-| Paciente | Usuário que realiza consultas. |
-| Profissional | Usuário responsável pelos atendimentos. |
-| Instituição | Clínica, hospital ou consultório. |
-| Especialidade | Área de atuação de um profissional. |
-| Agenda | Conjunto de horários disponíveis para atendimento. |
-| Consulta | Atendimento agendado entre paciente e profissional. |
-| Avaliação | Opinião registrada pelo paciente após a consulta. |
-| Disponibilidade | Horários livres para agendamento. |
+| Termo (negócio) | Termo no código | Significado |
+|-----------------|-----------------|-------------|
+| Unidade de saúde | `HealthFacility` | Estabelecimento físico que presta atendimento. |
+| Código CNES | `CnesCode` | Identificador oficial da unidade no CNES (7 dígitos). |
+| Tipo de unidade | `FacilityType` | Hospital, UPA, UBS etc. |
+| Especialidade / serviço | `Specialty` | Área de atendimento oferecida. |
+| Convênio | `HealthPlan` | Plano de saúde aceito. "SUS" é um registro especial. |
+| Localização | `GeoLocation` | Par latitude/longitude. |
+| Endereço | `Address` | Endereço postal. |
+| Horário de funcionamento | `OpeningHours` | Janelas de atendimento por dia da semana, ou 24h. |
+| Origem do dado | `DataSource` | `Cnes` ou `Manual`. |
+| Busca por proximidade | `NearbySearch` | Consulta de unidades num raio a partir de um ponto. |
 
 ---
 
-# Contextos Delimitados (Bounded Contexts)
-
-O domínio do MedPath será dividido nos seguintes contextos.
-
-## Identity
-
-Responsável pelo gerenciamento da identidade dos usuários da plataforma.
-
-### Responsabilidades
-
-- Cadastro de usuários.
-- Autenticação.
-- Autorização.
-- Recuperação de senha.
-- Controle de acesso.
-
----
-
-## Patients
-
-Responsável pelas informações relacionadas aos pacientes.
-
-### Responsabilidades
-
-- Cadastro de pacientes.
-- Atualização de dados pessoais.
-- Histórico de consultas.
-- Informações de contato.
-
----
-
-## Healthcare
-
-Responsável pelo gerenciamento dos profissionais e instituições.
-
-### Responsabilidades
-
-- Cadastro de profissionais.
-- Cadastro de especialidades.
-- Gerenciamento das instituições.
-- Vínculo entre profissionais e instituições.
-
----
-
-## Scheduling
-
-Responsável pelo gerenciamento das agendas e consultas.
-
-### Responsabilidades
-
-- Disponibilidade.
-- Agendamentos.
-- Cancelamentos.
-- Confirmações.
-- Histórico de consultas.
-
----
-
-## Reviews
-
-Responsável pelas avaliações realizadas pelos pacientes.
-
-### Responsabilidades
-
-- Registro das avaliações.
-- Consulta das avaliações.
-- Cálculo da reputação dos profissionais.
-
----
-
-## Administration
-
-Responsável pelas operações administrativas da plataforma.
-
-### Responsabilidades
-
-- Cadastro de instituições.
-- Administração de usuários.
-- Moderação de avaliações.
-- Configurações da plataforma.
-
----
-
-# Entidades
-
-As entidades representam objetos que possuem identidade própria dentro do domínio.
-
-## Usuário
-
-Representa uma identidade que possui acesso ao sistema.
-
-### Responsabilidades
-
-- Autenticar.
-- Alterar senha.
-- Atualizar credenciais.
-
----
-
-## Paciente
-
-Representa uma pessoa que busca atendimento.
-
-### Responsabilidades
-
-- Atualizar dados pessoais.
-- Agendar consultas.
-- Cancelar consultas.
-- Avaliar atendimentos.
-
----
-
-## Profissional
-
-Representa um profissional habilitado para realizar atendimentos.
-
-### Responsabilidades
-
-- Gerenciar agenda.
-- Informar especialidades.
-- Atuar em instituições.
-- Realizar atendimentos.
-
----
-
-## Instituição
-
-Representa um estabelecimento de saúde.
-
-### Responsabilidades
-
-- Gerenciar profissionais.
-- Atualizar informações.
-- Disponibilizar agendas.
-
----
-
-## Consulta
-
-Representa um atendimento agendado.
-
-### Responsabilidades
-
-- Agendar.
-- Confirmar.
-- Cancelar.
-- Finalizar.
-
----
-
-## Agenda
-
-Representa os horários disponíveis de atendimento de um profissional.
-
-### Responsabilidades
-
-- Disponibilizar horários.
-- Bloquear horários.
-- Liberar horários.
-
----
-
-## Avaliação
-
-Representa uma avaliação realizada por um paciente.
-
-### Responsabilidades
-
-- Registrar nota.
-- Registrar comentário.
-
----
-
-## Especialidade
-
-Representa uma área de atuação profissional.
-
-Exemplos:
-
-- Cardiologia
-- Dermatologia
-- Pediatria
-- Psicologia
-- Nutrição
-
----
-
-# Value Objects
-
-Objetos de valor representam conceitos do domínio que não possuem identidade própria.
-
-## Email
-
-Representa um endereço eletrônico válido.
-
----
-
-## Telefone
-
-Representa um número de telefone válido.
-
----
-
-## Endereço
-
-Representa uma localização física.
-
----
-
-## Registro Profissional
-
-Representa registros emitidos por conselhos profissionais.
-
-Exemplos:
-
-- CRM
-- CRO
-- CRP
-- CREFITO
-
----
-
-## Horário
-
-Representa um período disponível para atendimento.
-
----
-
-# Agregados
-
-Os agregados definem os limites de consistência das regras de negócio.
-
-## Agregado Paciente
-
-Raiz:
-
-- Paciente
-
-Objetos relacionados:
-
-- Endereço
-
----
-
-## Agregado Profissional
-
-Raiz:
-
-- Profissional
-
-Objetos relacionados:
-
-- Especialidades
-- Agenda
-
----
-
-## Agregado Instituição
-
-Raiz:
-
-- Instituição
-
-Objetos relacionados:
-
-- Profissionais
-
----
-
-## Agregado Consulta
-
-Raiz:
-
-- Consulta
-
-Objetos relacionados:
-
-- Horário
-
----
-
-## Agregado Avaliação
-
-Raiz:
-
-- Avaliação
-
----
-
-# Eventos de Domínio
-
-Os eventos representam acontecimentos relevantes para o negócio.
-
-## ConsultaAgendada
-
-Disparado quando uma consulta é criada com sucesso.
-
----
-
-## ConsultaCancelada
-
-Disparado quando uma consulta é cancelada.
-
----
-
-## ConsultaConfirmada
-
-Disparado quando uma consulta é confirmada.
-
----
-
-## ConsultaFinalizada
-
-Disparado quando uma consulta é concluída.
-
----
-
-## AvaliacaoRegistrada
-
-Disparado quando um paciente registra uma avaliação.
-
----
-
-# Regras de Domínio
-
-As principais regras de negócio do domínio são:
-
-- Um paciente deve possuir um usuário válido para acessar a plataforma.
-- Um profissional deve possuir um registro profissional válido.
-- Instituições não podem realizar auto cadastro.
-- Apenas administradores podem cadastrar instituições.
-- Um profissional pode atuar em uma ou mais instituições.
-- Uma instituição pode possuir diversos profissionais.
-- Um paciente pode possuir diversas consultas.
-- Um horário não pode ser reservado por mais de uma consulta.
-- Apenas consultas finalizadas podem ser avaliadas.
-- Uma consulta poderá possuir apenas uma avaliação.
-
----
-
-# Relacionamentos Conceituais
+## Bounded Contexts
 
 ```text
-Paciente
-    │
-    │ realiza
-    ▼
-Consulta
-    ▲
-    │
-Profissional
-    │
-    │ pertence a
-    ▼
-Instituição
+┌─────────────────────────┐      ┌───────────────┐
+│       Facilities        │      │   Identity    │
+│ catálogo + busca + CNES │      │ usuários/auth │
+└───────────▲─────────────┘      └───────▲───────┘
+            │ contratos públicos         │
+┌───────────┴─────────────┐              │
+│   Engagement (F2)       │──────────────┘
+│ favoritos, avaliações   │
+└─────────────────────────┘
+```
 
-Profissional
-    │
-    │ possui
-    ▼
-Especialidade
+O Engagement guarda apenas o `FacilityId` e o `UserId`. Ele não conhece as entidades internas dos outros módulos.
 
-Profissional
-    │
-    │ possui
-    ▼
-Agenda
+---
 
-Consulta
-    │
-    │ gera
-    ▼
-Avaliação
+## Contexto Facilities (MVP)
+
+### Agregado `HealthFacility` (raiz)
+
+| Atributo | Tipo | Regras |
+|----------|------|--------|
+| `Id` | Guid | Gerado pelo sistema. |
+| `CnesCode` | `CnesCode?` (VO) | Opcional (unidades manuais podem não ter), único quando presente. |
+| `Name` | string | Obrigatório, até 200 caracteres. |
+| `Type` | `FacilityType` | Obrigatório (RN003). |
+| `Address` | `Address` (VO) | Obrigatório. |
+| `Location` | `GeoLocation?` (VO) | Sem localização, a unidade não aparece na busca (RN005). |
+| `Phone` | `PhoneNumber?` (VO) | Opcional. |
+| `OpeningHours` | `OpeningHours` (VO) | Padrão: desconhecido. |
+| `Specialties` | coleção de `SpecialtyId` | N:N. |
+| `HealthPlans` | coleção de `HealthPlanId` | N:N. |
+| `Source` | `DataSource` | `Cnes` ou `Manual` (RN008). |
+| `IsActive` | bool | Unidades inativas não aparecem na busca (RN006). |
+| `LastVerifiedAt` | DateTimeOffset | Data da última importação ou edição. |
+
+**Comportamentos (métodos da entidade, não setters públicos):**
+
+- `Create(...)`: valida invariantes e cria a unidade.
+- `UpdateFromCnes(...)`: atualiza os dados apenas se `Source == Cnes` (RN008).
+- `EditManually(...)`: aplica a edição e muda `Source` para `Manual`.
+- `Relocate(GeoLocation)`: altera a localização.
+- `AddSpecialty / RemoveSpecialty`, `AcceptHealthPlan / RemoveHealthPlan`.
+- `Deactivate()` / `Activate()`.
+- `IsOpenAt(DateTimeOffset)`: retorna `true` se for 24h (RN007) ou se o horário estiver dentro de alguma janela.
+
+### Entidades de referência
+
+- **`Specialty`**: `Id`, `Name`, `Slug`. Exemplos: Pediatria, Ortopedia, Cardiologia, Obstetrícia, Odontologia.
+- **`HealthPlan`**: `Id`, `Name`, `Slug`. "SUS" é um registro criado pelo seed.
+
+### Value Objects
+
+| VO | Invariantes |
+|----|-------------|
+| `GeoLocation` | Latitude ∈ [-90, 90], longitude ∈ [-180, 180]. Imutável. Igualdade por valor. |
+| `CnesCode` | Exatamente 7 dígitos numéricos. |
+| `Address` | Logradouro, número (opcional), bairro, cidade, UF (2 letras válidas), CEP (8 dígitos). |
+| `PhoneNumber` | Apenas dígitos, 10 ou 11 caracteres (com DDD). |
+| `OpeningHours` | `Is24Hours` ou uma lista de janelas `(DayOfWeek, Open, Close)` com `Open < Close`. |
+
+### `FacilityType` (enum)
+
+| Valor | Descrição |
+|-------|-----------|
+| `Hospital` | Hospital geral ou especializado |
+| `EmergencyCare` | UPA / pronto-socorro / pronto-atendimento |
+| `PrimaryCare` | UBS / posto de saúde |
+| `Clinic` | Clínica / ambulatório especializado |
+| `Laboratory` | Laboratório / diagnóstico por imagem |
+| `Other` | Demais tipos do CNES |
+
+> A tabela que converte o código de tipo do CNES para esse enum fica no importador (Infrastructure) e não no domínio.
+
+### Regras de domínio
+
+1. Uma unidade com `CnesCode` não pode ter o código alterado.
+2. A importação nunca sobrescreve uma unidade com `Source == Manual`.
+3. Uma unidade não pode ter a mesma especialidade ou o mesmo convênio repetido.
+4. Unidade 24h ignora as janelas de horário.
+
+### Read model: busca por proximidade
+
+A busca é uma **query** e não passa pelo agregado: ela lê direto do banco e projeta para DTOs (CQRS leve).
+
+```text
+Entrada: GeoLocation origem, raio (km), filtros opcionais
+Saída:   lista de { Id, Name, Type, DistanceKm, Address, IsOpenNow }
+Ordem:   distância ascendente
 ```
 
 ---
 
-# Considerações
+## Contexto Identity (MVP)
 
-O modelo de domínio deve permanecer independente de qualquer tecnologia de implementação.
+- **`User`**: `Id`, `Email` (VO, único), `PasswordHash`, `Role` (`Admin` | `Patient`), `IsActive`.
+- No MVP existe apenas o perfil `Admin`. O primeiro administrador é criado pelo seed de desenvolvimento.
 
-Alterações em banco de dados, frameworks, bibliotecas ou infraestrutura não deverão impactar as regras descritas neste documento.
+---
 
-A implementação técnica do domínio será detalhada nos documentos de Arquitetura e Banco de Dados.
+## Contexto Engagement (F2, esboço)
+
+- **`Review`**: `Id`, `FacilityId`, `UserId`, `Rating` (1–5), `Comment?`, `Status` (`Published` | `Hidden`). Uma por usuário e unidade (RN010).
+- **`Favorite`**: `UserId`, `FacilityId`.
+- Evento de domínio `ReviewSubmitted`, que permite recalcular a nota média.
+
+---
+
+## Eventos de domínio (MVP)
+
+| Evento | Quando |
+|--------|--------|
+| `FacilityCreated` | Uma unidade é criada (manual ou importação). |
+| `FacilityDeactivated` | Uma unidade é desativada. |
+
+> No MVP os eventos servem apenas para auditoria e logs. Eles não precisam de mensageria.

@@ -1,533 +1,165 @@
 # Padrões da API
 
-## Objetivo
+| Campo | Valor |
+|-------|-------|
+| Código | API-001 |
+| Versão | 0.2.0 |
+| Status | Aprovado |
+| Última atualização | 12/10/2026 |
 
-Este documento define os padrões utilizados pelas APIs do MedPath.
-
-Seu objetivo é garantir consistência entre os endpoints, facilitar a manutenção do código, melhorar a experiência dos consumidores da API e reduzir ambiguidades durante o desenvolvimento.
-
-Todas as APIs deverão seguir as convenções descritas neste documento.
-
----
-
-# Princípios
-
-A API do MedPath seguirá os seguintes princípios:
-
-- RESTful
-- API First
-- Stateless
-- Versionada
-- Documentada com OpenAPI
-- Contratos consistentes
-- Respostas padronizadas
-- URLs orientadas a recursos
+Todas as APIs do MedPath seguem estas convenções. Mudanças de padrão exigem um ADR.
 
 ---
 
-# URL Base
+## Princípios
 
-Todas as rotas deverão utilizar versionamento.
-
-Exemplo:
-
-```text
-/api/v1
-```
+RESTful · API First ([ADR-001](Adr/ADR-001-api-first.md)) · stateless · versionada · documentada com OpenAPI · URLs orientadas a recursos · erros em ProblemDetails ([ADR-009](Adr/ADR-009-problem-details.md)).
 
 ---
 
-# Estrutura das Rotas
+## URLs
 
-As URLs deverão representar recursos e nunca ações.
+- Prefixo de versão: `/api/v1`.
+- Recursos em inglês, plural, kebab-case: `/api/v1/facilities`, `/api/v1/health-plans`.
+- Endpoints administrativos ficam sob `/api/v1/admin/...` e exigem o perfil `Admin`.
+- Nunca usar verbos na URL (`/getFacilities`, `/buscarHospital`). A exceção é uma subcoleção de consulta clara, como `/facilities/nearby`.
 
-## Correto
+### Endpoints do MVP
 
-```text
-GET    /api/v1/patients
+| Método | Rota | Auth | Requisito |
+|--------|------|------|-----------|
+| GET | `/api/v1/facilities/nearby?lat=&lng=&radiusKm=&type=&specialty=&healthPlan=&openNow=&page=&pageSize=` | Público | RF001–RF007 |
+| GET | `/api/v1/facilities/{id}` | Público | RF008 |
+| GET | `/api/v1/specialties` | Público | Filtros |
+| GET | `/api/v1/health-plans` | Público | Filtros |
+| POST | `/api/v1/auth/token` | Público | RF015 |
+| POST | `/api/v1/admin/facilities` | Admin | RF013 |
+| PUT | `/api/v1/admin/facilities/{id}` | Admin | RF013 |
+| POST | `/api/v1/admin/facilities/{id}/deactivate` | Admin | RF013 |
+| POST/PUT | `/api/v1/admin/specialties`, `/api/v1/admin/health-plans` | Admin | RF014 |
 
-GET    /api/v1/patients/{id}
-
-POST   /api/v1/patients
-
-PUT    /api/v1/patients/{id}
-
-PATCH  /api/v1/patients/{id}
-
-DELETE /api/v1/patients/{id}
-```
-
----
-
-## Incorreto
-
-```text
-/api/GetPatients
-
-/api/CreatePatient
-
-/api/DeletePatient
-
-/api/BuscarPaciente
-```
+> `deactivate` é uma *ação de domínio* modelada como sub-recurso via POST. É mais expressivo que um `PATCH { isActive: false }`, porque dispara uma regra de negócio.
 
 ---
 
-# Convenção de Nomes
+## Métodos HTTP
 
-Os recursos deverão utilizar nomes em inglês.
-
-| Português | API |
-|------------|-----|
-| Paciente | patients |
-| Profissional | professionals |
-| Instituição | institutions |
-| Consulta | appointments |
-| Agenda | schedules |
-| Avaliação | reviews |
-| Especialidade | specialties |
-| Usuário | users |
+| Método | Uso | Idempotente |
+|--------|-----|-------------|
+| GET | Consulta. Nunca altera estado. | Sim |
+| POST | Cria recurso ou executa ação de domínio. | Não |
+| PUT | Substitui o recurso por completo. | Sim |
+| PATCH | Atualização parcial (usar só quando necessário). | Não garantido |
+| DELETE | Remove o recurso. | Sim |
 
 ---
 
-# Métodos HTTP
+## Status HTTP
 
-## GET
+| Status | Quando |
+|--------|--------|
+| 200 OK | Consulta ou atualização com corpo de resposta. |
+| 201 Created | Criação. Inclui o header `Location` apontando para o novo recurso. |
+| 204 No Content | Sucesso sem corpo. |
+| 400 Bad Request | **Entrada inválida**: formato, campo obrigatório, faixa (ex.: `lat=200`). Usa `ValidationProblemDetails`. |
+| 401 Unauthorized | Sem token ou token inválido. |
+| 403 Forbidden | Autenticado, mas sem permissão. |
+| 404 Not Found | Recurso inexistente. |
+| 409 Conflict | Violação de regra de negócio ou conflito de estado (ex.: código CNES duplicado, `RowVersion` divergente). |
+| 500 Internal Server Error | Erro inesperado. Mensagem genérica, sem detalhes internos. |
 
-Consultar informações.
-
-Nunca altera dados.
-
----
-
-## POST
-
-Criar recursos.
-
----
-
-## PUT
-
-Atualizar completamente um recurso.
+> Não usamos 422, para evitar ambiguidade: entrada inválida é **400** e regra de negócio violada é **409**.
 
 ---
 
-## PATCH
+## Respostas de sucesso
 
-Atualização parcial.
-
----
-
-## DELETE
-
-Exclusão lógica do recurso.
-
----
-
-# Status HTTP
-
-## 200 OK
-
-Consulta realizada com sucesso.
-
----
-
-## 201 Created
-
-Recurso criado.
-
----
-
-## 204 No Content
-
-Operação concluída sem retorno.
-
----
-
-## 400 Bad Request
-
-Dados inválidos.
-
----
-
-## 401 Unauthorized
-
-Usuário não autenticado.
-
----
-
-## 403 Forbidden
-
-Usuário autenticado, porém sem permissão.
-
----
-
-## 404 Not Found
-
-Recurso inexistente.
-
----
-
-## 409 Conflict
-
-Violação de regra de negócio.
-
-Exemplo:
-
-Paciente tentando agendar horário ocupado.
-
----
-
-## 422 Unprocessable Entity
-
-Validações de domínio.
-
----
-
-## 500 Internal Server Error
-
-Erro inesperado.
-
----
-
-# Estrutura das Respostas
-
-## Sucesso
+O recurso é retornado diretamente, sem envelope:
 
 ```json
 {
-  "success": true,
-  "data": {}
+  "id": "0199d6c2-7a3e-7c41-9a0e-3c2f1b8e4d10",
+  "name": "Hospital Municipal Exemplo",
+  "type": "Hospital",
+  "distanceKm": 1.42,
+  "isOpenNow": true
 }
 ```
 
----
-
-## Lista
+Listas paginadas:
 
 ```json
 {
-  "success": true,
-  "data": [
-    {}
-  ]
-}
-```
-
----
-
-## Erro
-
-```json
-{
-  "success": false,
-  "message": "O horário informado não está disponível.",
-  "errors": []
-}
-```
-
----
-
-# Paginação
-
-Endpoints de listagem deverão suportar paginação.
-
-Exemplo:
-
-```http
-GET /api/v1/professionals?page=1&pageSize=20
-```
-
-Resposta:
-
-```json
-{
-  "success": true,
+  "items": [ { "...": "..." } ],
   "page": 1,
   "pageSize": 20,
-  "totalItems": 150,
-  "totalPages": 8,
-  "data": []
+  "totalItems": 57,
+  "totalPages": 3
 }
 ```
 
----
-
-# Ordenação
-
-Os endpoints deverão permitir ordenação.
-
-Exemplo:
-
-```text
-sort=name
-
-sort=createdAt
-
-sort=rating
-```
+- Paginação: `page` (padrão 1) e `pageSize` (padrão 20, máximo 100).
+- JSON em camelCase, enums como **string** (`"Hospital"`, não `1`).
+- Datas em ISO 8601 com fuso (`2026-10-12T14:30:00-03:00`).
 
 ---
 
-# Filtros
-
-Filtros deverão utilizar Query String.
-
-Exemplo
-
-```http
-GET /professionals?city=São Paulo
-
-GET /professionals?specialty=Cardiology
-
-GET /professionals?institution=Hospital Albert Einstein
-```
-
-Filtros poderão ser combinados.
-
----
-
-# Versionamento
-
-Toda API deverá possuir versão.
-
-Formato:
-
-```text
-/api/v1
-
-/api/v2
-```
-
-Nunca remover versões utilizadas por clientes ativos.
-
----
-
-# Autenticação
-
-Todas as rotas protegidas utilizarão JWT.
-
-Exemplo:
-
-```http
-Authorization: Bearer <token>
-```
-
----
-
-# DTOs
-
-Entidades nunca deverão ser expostas diretamente.
-
-Sempre utilizar DTOs.
-
-Exemplo:
-
-```text
-PatientResponse
-
-CreatePatientRequest
-
-UpdatePatientRequest
-```
-
----
-
-# Convenção para Requests
-
-Toda criação deverá utilizar:
-
-```text
-Create<Entity>Request
-```
-
-Exemplo
-
-```text
-CreateAppointmentRequest
-```
-
----
-
-Atualizações:
-
-```text
-UpdateAppointmentRequest
-```
-
----
-
-Respostas
-
-```text
-AppointmentResponse
-```
-
----
-
-# Commands e Queries
-
-A camada Application utilizará a seguinte convenção.
-
-## Commands
-
-Representam alteração de estado.
-
-Exemplos
-
-```text
-CreatePatientCommand
-
-UpdatePatientCommand
-
-DeletePatientCommand
-
-ScheduleAppointmentCommand
-```
-
----
-
-## Queries
-
-Representam consultas.
-
-```text
-GetPatientByIdQuery
-
-GetProfessionalsQuery
-
-GetAppointmentsQuery
-```
-
----
-
-# Validação
-
-Todas as validações deverão ocorrer utilizando FluentValidation.
-
-Controllers não deverão possuir validações de negócio.
-
----
-
-# Erros
-
-Erros deverão possuir mensagens claras.
-
-## Correto
-
-```text
-"O horário selecionado já está ocupado."
-```
-
----
-
-## Incorreto
-
-```text
-"Erro 154."
-```
-
----
-
-# Idempotência
-
-PUT deverá ser idempotente.
-
-DELETE também.
-
-POST não possui obrigatoriedade de idempotência.
-
----
-
-# Convenções para Controllers
-
-Nome:
-
-```text
-PatientsController
-
-ProfessionalsController
-
-AppointmentsController
-```
-
-Nunca:
-
-```text
-PatientController
-```
-
----
-
-# OpenAPI
-
-Todos os endpoints deverão possuir:
-
-- Summary
-- Description
-- Response Codes
-- Exemplos
-
----
-
-# Segurança
-
-Nunca retornar:
-
-- Stack Trace
-- Exception.Message
-- Dados internos
-- Strings de conexão
-
----
-
-# Boas Práticas
-
-- Utilizar verbos HTTP corretamente.
-- Nunca expor entidades.
-- Nunca retornar Exception.
-- Nunca utilizar SELECT *.
-- Nunca implementar regra de negócio em Controllers.
-- Utilizar DTOs.
-- Padronizar respostas.
-- Manter documentação atualizada.
-
----
-
-# Exemplo Completo
-
-## Endpoint
-
-```http
-POST /api/v1/appointments
-```
-
-Request
+## Respostas de erro (ProblemDetails)
 
 ```json
 {
-  "patientId": "c4d1...",
-  "professionalId": "e18f...",
-  "scheduleId": "9ac3..."
+  "type": "https://httpstatuses.io/400",
+  "title": "One or more validation errors occurred.",
+  "status": 400,
+  "errors": {
+    "lat": ["Latitude deve estar entre -90 e 90."]
+  },
+  "traceId": "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01"
 }
 ```
 
-Response
-
-```json
-{
-  "success": true,
-  "data": {
-    "id": "8c7c...",
-    "status": "Scheduled"
-  }
-}
-```
+- Mensagens de validação e de regra de negócio em **português**, porque são exibidas ao usuário.
+- Nunca expor stack trace, `Exception.Message`, SQL ou strings de conexão.
+- O `traceId` permite encontrar o log correspondente.
 
 ---
 
-# Considerações
+## Filtros e ordenação
 
-Toda nova API desenvolvida para o MedPath deverá seguir as convenções descritas neste documento.
+- Filtros via query string, combináveis: `?type=Hospital&specialty=pediatria`.
+- Filtros por entidade de referência usam o **slug** (`pediatria`), não o Id.
+- Ordenação: `sort=name` ou `sort=-name` (descendente), apenas nos campos documentados.
 
-Qualquer alteração de padrão deverá ser registrada através de um ADR e refletida nesta documentação.
+---
+
+## DTOs e nomes
+
+| Tipo | Convenção | Exemplo |
+|------|-----------|---------|
+| Request de criação | `Create<Entity>Request` | `CreateFacilityRequest` |
+| Request de atualização | `Update<Entity>Request` | `UpdateFacilityRequest` |
+| Response | `<Entity>Response` / `<Entity>SummaryResponse` | `FacilityResponse` |
+| Command | `<Verbo><Entity>Command` | `DeactivateFacilityCommand` |
+| Query | `Get<Algo>Query` | `GetNearbyFacilitiesQuery` |
+
+Entidades de domínio **nunca** são serializadas na resposta.
+
+---
+
+## Autenticação
+
+`Authorization: Bearer <token>` em todas as rotas protegidas ([ADR-008](Adr/ADR-008-authentication-jwt.md)).
+
+---
+
+## OpenAPI
+
+Todo endpoint deve declarar: summary, tags (o nome do módulo), possíveis status de resposta e tipos de request/response. O documento fica disponível em `/openapi/v1.json`, com UI apenas em Development.
+
+---
+
+## Versionamento
+
+- Mudanças **compatíveis** (novo campo opcional, novo endpoint) ficam na mesma versão.
+- Mudanças **incompatíveis** (remover ou renomear campo, mudar tipo) exigem `/api/v2`.
+- Uma versão só é removida após aviso prévio aos consumidores.

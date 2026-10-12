@@ -2,7 +2,7 @@
 
 ## Status
 
-Aprovado
+Aceito
 
 ---
 
