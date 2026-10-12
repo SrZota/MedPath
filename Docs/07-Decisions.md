@@ -1,290 +1,36 @@
-# Decisões Arquiteturais
-
-## Objetivo
-
-Este documento consolida as principais decisões arquiteturais adotadas no MedPath.
-
-Seu objetivo é fornecer uma visão centralizada das escolhas realizadas durante o desenvolvimento do projeto, facilitando o entendimento da arquitetura e servindo como ponto de referência para desenvolvedores, arquitetos e mantenedores.
-
-Cada decisão detalhada possui um ADR correspondente localizado na pasta **Adr**.
-
----
-
-# Como Ler Este Documento
-
-Cada decisão apresenta:
-
-- O problema que motivou a escolha;
-- A decisão adotada;
-- A justificativa;
-- O impacto esperado;
-- O ADR correspondente.
-
----
-
-# Resumo das Decisões
-
-| Código | Decisão | Status |
-|---------|---------|--------|
-| ADR-001 | API First | ✅ Aceita |
-| ADR-002 | Modular Monolith | ✅ Aceita |
-| ADR-003 | Clean Architecture | ✅ Aceita |
-| ADR-004 | SQL Server | ⏳ Planejada |
-| ADR-005 | JWT | ⏳ Planejada |
-| ADR-006 | Entity Framework Core | ⏳ Planejada |
-| ADR-007 | FluentValidation | ⏳ Planejada |
-| ADR-008 | Serilog | ⏳ Planejada |
-| ADR-009 | Versionamento da API | ⏳ Planejada |
-
----
-
-# ADR-001 — API First
-
-## Problema
-
-O sistema será consumido por uma aplicação Web e, futuramente, poderá ser integrado com outras aplicações.
-
-## Decisão
-
-Adotar a abordagem **API First**, desenvolvendo os contratos da API antes da implementação das funcionalidades.
-
-## Justificativa
-
-- Facilita integrações.
-- Permite evolução independente do frontend.
-- Define contratos claros entre cliente e servidor.
-
-## Impacto
-
-Todas as funcionalidades deverão ser expostas através de APIs REST documentadas.
-
----
-
-# ADR-002 — Modular Monolith
-
-## Problema
-
-Era necessário definir uma arquitetura que permitisse crescimento sem introduzir a complexidade operacional dos microsserviços.
-
-## Decisão
-
-Adotar uma arquitetura **Monólito Modular**.
-
-## Justificativa
-
-- Simplicidade de implantação.
-- Menor custo operacional.
-- Separação clara entre módulos.
-- Facilidade para futura migração para microsserviços.
-
-## Impacto
-
-Cada módulo possuirá responsabilidade própria e dependerá de contratos bem definidos.
-
----
-
-# ADR-003 — Clean Architecture
-
-## Problema
-
-Era necessário manter as regras de negócio independentes de frameworks e tecnologias.
-
-## Decisão
-
-Adotar a **Clean Architecture**.
-
-## Justificativa
-
-- Baixo acoplamento.
-- Alta testabilidade.
-- Independência tecnológica.
-- Facilidade de manutenção.
-
-## Impacto
-
-O domínio permanecerá isolado da infraestrutura.
-
----
-
-# ADR-004 — SQL Server
-
-## Problema
-
-Era necessário definir um banco de dados relacional confiável para suportar o domínio da aplicação.
-
-## Decisão
-
-Utilizar SQL Server.
-
-## Justificativa
-
-- Excelente integração com o ecossistema .NET.
-- Suporte completo ao Entity Framework Core.
-- Recursos avançados de segurança e desempenho.
-
-## Impacto
-
-Toda a persistência será baseada em banco de dados relacional.
-
-**Status:** Planejado.
-
----
-
-# ADR-005 — JWT
-
-## Problema
-
-Era necessário definir uma estratégia de autenticação stateless para a API.
-
-## Decisão
-
-Utilizar JSON Web Token (JWT).
-
-## Justificativa
-
-- Escalabilidade.
-- Independência de sessão.
-- Compatibilidade com APIs REST.
-
-## Impacto
-
-A autenticação será baseada em tokens assinados.
-
-**Status:** Planejado.
-
----
-
-# ADR-006 — Entity Framework Core
-
-## Problema
-
-Era necessário definir uma estratégia para persistência de dados.
-
-## Decisão
-
-Utilizar Entity Framework Core como ORM.
-
-## Justificativa
-
-- Integração nativa com .NET.
-- Suporte a Migrations.
-- Fluent API.
-- Alto nível de produtividade.
-
-## Impacto
-
-Todo acesso ao banco será realizado através da camada Infrastructure.
-
-**Status:** Planejado.
-
----
-
-# ADR-007 — FluentValidation
-
-## Problema
-
-Era necessário padronizar a validação das entradas da aplicação.
-
-## Decisão
-
-Utilizar FluentValidation.
-
-## Justificativa
-
-- Separação das regras de validação.
-- Código mais limpo.
-- Fácil manutenção.
-
-## Impacto
-
-As validações serão executadas na camada Application.
-
-**Status:** Planejado.
-
----
-
-# ADR-008 — Serilog
-
-## Problema
-
-Era necessário definir uma estratégia para registro estruturado de logs.
-
-## Decisão
-
-Utilizar Serilog.
-
-## Justificativa
-
-- Logs estruturados.
-- Integração com diversos provedores.
-- Facilidade para auditoria e monitoramento.
-
-## Impacto
-
-Todos os eventos importantes da aplicação deverão ser registrados.
-
-**Status:** Planejado.
-
----
-
-# ADR-009 — Versionamento da API
-
-## Problema
-
-Era necessário garantir evolução da API sem quebrar integrações existentes.
-
-## Decisão
-
-Versionar a API.
-
-## Justificativa
-
-- Compatibilidade entre versões.
-- Evolução controlada.
-- Menor impacto para consumidores.
-
-## Impacto
-
-Os endpoints seguirão o padrão:
-
-```text
-/api/v1/
-```
-
-**Status:** Planejado.
-
----
-
-# Diretrizes para Novas Decisões
-
-Toda nova decisão arquitetural deverá:
-
-- Resolver um problema identificado.
-- Avaliar alternativas.
-- Registrar justificativa.
-- Documentar impactos.
-- Possuir um ADR correspondente.
-
----
-
-# Histórico
-
-| Data | ADR | Descrição |
-|------|-----|-----------|
-| 2026 | ADR-001 | API First |
-| 2026 | ADR-002 | Modular Monolith |
-| 2026 | ADR-003 | Clean Architecture |
-| 2026 | ADR-004 | SQL Server |
-| 2026 | ADR-005 | JWT |
-| 2026 | ADR-006 | Entity Framework Core |
-| 2026 | ADR-007 | FluentValidation |
-| 2026 | ADR-008 | Serilog |
-| 2026 | ADR-009 | Versionamento da API |
-
----
-
-# Considerações
-
-As decisões registradas neste documento representam o estado atual da arquitetura do MedPath.
-
-Sempre que uma decisão for alterada, um novo ADR deverá ser criado, preservando o histórico e garantindo a rastreabilidade das escolhas arquiteturais do projeto.
+# Registro de Decisões Arquiteturais
+
+Índice de todos os ADRs (*Architecture Decision Records*). Cada arquivo em [Adr/](Adr/) registra uma decisão com o contexto, as alternativas consideradas e as consequências.
+
+## Como funciona
+
+- Um ADR **aceito nunca é editado** para mudar a decisão. Se a decisão mudar, cria-se um novo ADR que o *substitui*, e o antigo recebe o status "Substituído por ADR-XXX". Assim o histórico do raciocínio fica preservado.
+- ADRs **🟡 Propostos** aguardam a decisão do desenvolvedor. Neles, o PO/Tech Lead apresenta as opções e uma recomendação, mas quem decide é quem vai implementar.
+- Template: copie qualquer ADR existente (Contexto → Opções/Alternativas → Decisão → Consequências).
+
+## Índice
+
+| ADR | Título | Status |
+|-----|--------|--------|
+| [001](Adr/ADR-001-api-first.md) | API First | ✅ Aceito |
+| [002](Adr/ADR-002-modular-monolith.md) | Monólito Modular | ✅ Aceito |
+| [003](Adr/ADR-003-clean-architecture.md) | Clean Architecture por módulo | ✅ Aceito |
+| [004](Adr/ADR-004-dotnet-10.md) | .NET 10 LTS | ✅ Aceito |
+| [005](Adr/ADR-005-sqlserver-efcore.md) | SQL Server + EF Core | ✅ Aceito |
+| [006](Adr/ADR-006-geolocation.md) | Geolocalização com `geography` | ✅ Aceito |
+| [007](Adr/ADR-007-cnes-data-source.md) | Base inicial a partir do CNES | ✅ Aceito |
+| [008](Adr/ADR-008-authentication-jwt.md) | Autenticação JWT | ✅ Aceito |
+| [009](Adr/ADR-009-problem-details.md) | Erros com ProblemDetails | ✅ Aceito |
+| [010](Adr/ADR-010-code-language.md) | Código em inglês | ✅ Aceito |
+| [011](Adr/ADR-011-route-deep-link.md) | Rota por link para app de mapas | ✅ Aceito |
+| [012](Adr/ADR-012-endpoints-style.md) | Controllers ou Minimal APIs | 🟡 Proposto |
+| [013](Adr/ADR-013-project-granularity.md) | Projetos por módulo | 🟡 Proposto |
+| [014](Adr/ADR-014-use-case-dispatch.md) | Despacho de casos de uso (MediatR?) | 🟡 Proposto |
+
+## Próximos ADRs previstos
+
+| Tema | Quando |
+|------|--------|
+| Tecnologia do cliente Web (Blazor, Angular, React…) | Início da Fase 1 |
+| Provedor de nuvem e hospedagem | Fim da Fase 1 |
+| Geocodificação de endereço/CEP | Fase 2 |
